@@ -22,3 +22,11 @@ bot.onText(/\/question (.+)/, function(msg, match) {
     });
   });
 });
+
+bot.on('message', function(msg) {
+  var chatId = msg.chat.id;
+
+  if(msg.sticker) {
+    bot.sendMessage(chatId, "msg was a sticker");
+  }
+});
