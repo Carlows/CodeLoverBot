@@ -25,3 +25,8 @@ bot.onText(/\/hey (.+)/, function(msg, match) {
     });
   });
 });
+
+bot.onText(/\/marico/, function(msg, match) {
+  var chatId = msg.chat.id;
+  bot.sendMessage(chatId, format("Marico el que lo lea"));
+});
