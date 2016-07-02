@@ -3,6 +3,7 @@ var Cleverbot = require('cleverbot-node');
 var format = require('string-template');
 var mongoose = require('mongoose');
 var moment = require('moment');
+var _ = require('lodash');
 
 var token = process.env.BOT_TOKEN;
 
@@ -35,7 +36,9 @@ var messageSchema = mongoose.Schema({
 var Message = mongoose.model('Message', messageSchema);
 
 var memberSchema = mongoose.Schema({
-  name: String
+  firstname: String,
+  lastname: String,
+  email: String
 });
 
 var Member = mongoose.model('Member', memberSchema);
@@ -49,8 +52,8 @@ bot.onText(/\/faggot/, function(msg, match) {
       return;
     }
 
-    var faggot = members[Math.floor(Math.random() * members.length)].name;
-    bot.sendMessage(chatId, format("{name} es marico", { name: faggot }));
+    var faggot = members[Math.floor(Math.random() * members.length)];
+    bot.sendMessage(chatId, format("{firstname} {lastname} es marico", { firstname: faggot.firstname, lastname: faggot.lastname }));
   });
 });
 
@@ -91,8 +94,6 @@ bot.onText(/\/storeimportant (.+)/, function(msg, match) {
 bot.onText(/\/important/, function(msg, match) {
   var chatId = msg.chat.id;
 
-  bot.sendMessage(chatId, format("Important messages for {date}", { date: moment().format("dddd, MMMM Do") }));
-
   var today = moment().startOf('day');
   var tomorrow = moment(today).add(1, 'days');
 
@@ -104,9 +105,12 @@ bot.onText(/\/important/, function(msg, match) {
     }
 
     if(messages.length > 0) {
-      messages.forEach(function (msg) {
-        bot.sendMessage(chatId, format("- {msg}", { msg: msg.message }));
-      });
+      var formattedMsgs = _.map(messages, function(msg) { return format("- {msj}\n", { msj: msg.message }) });
+
+      bot.sendMessage(chatId, format("Important messages for *{date}*\n\n{msgs}", {
+        date: moment().format("dddd, MMMM Do"),
+        msgs: formattedMsgs.join('')
+      }), { parse_mode: "Markdown" });
     } else {
       bot.sendMessage(chatId, "No messages stored for today.");
     }
@@ -125,11 +129,13 @@ bot.onText(/\/clearimportant/, function(msg, match) {
   });
 });
 
-bot.onText(/\/addmember (\w+)/, function(msg, match) {
+bot.onText(/\/addmember (\w+) (\w+) (.+@\w+\.\w+)/, function(msg, match) {
   var chatId = msg.chat.id;
   var memberName = match[1];
+  var memberLastname = match[2];
+  var memberEmail = match[3];
 
-  var member = new Member({ name: memberName });
+  var member = new Member({ firstname: memberName, lastname: memberLastname, email: memberEmail });
 
   member.save(function(err, obj) {
     if(err) {
@@ -152,9 +158,16 @@ bot.onText(/\/listmembers/, function(msg, match) {
     }
 
     if(members.length > 0) {
-      members.forEach(function (mbr) {
-        bot.sendMessage(chatId, format("- {member}", { member: mbr.name }));
+      var formattedMembers = _.map(members, function(mbr) { return format("- {firstname} {lastname} *{email}*\n", {
+          firstname: mbr.firstname,
+          lastname: mbr.lastname,
+          email: mbr.email || 'faggot has no email set up'
+        })
       });
+
+      bot.sendMessage(chatId, format("*Group member contact list*\n\n{members}", {
+        members: formattedMembers.join('')
+      }), { parse_mode: "Markdown" });
     } else {
       bot.sendMessage(chatId, "No members stored yet.");
     }
