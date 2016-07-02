@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "cleverbot-node": "^0.2.2",
+    "moment": "^2.13.0",
+    "mongoose": "^4.5.3",
     "node-telegram-bot-api": "^0.23.3",
     "string-template": "^1.0.0"
   }
