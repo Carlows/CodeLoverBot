@@ -125,7 +125,7 @@ bot.onText(/\/clearimportant/, function(msg, match) {
   });
 });
 
-bot.onText(/\/addmember (\w)/, function(msg, match) {
+bot.onText(/\/addmember (\w+)/, function(msg, match) {
   var chatId = msg.chat.id;
   var memberName = match[1];
 
@@ -137,7 +137,7 @@ bot.onText(/\/addmember (\w)/, function(msg, match) {
       return;
     }
 
-    bot.sendMessage(chatId, "member saved correctly");
+    bot.sendMessage(chatId, "Member saved correctly");
   });
 });
 
@@ -157,6 +157,18 @@ bot.onText(/\/listmembers/, function(msg, match) {
       });
     } else {
       bot.sendMessage(chatId, "No members stored yet.");
+    }
+  });
+});
+
+bot.onText(/\/clearmembers/, function(msg, match) {
+  var chatId = msg.chat.id;
+
+  bot.sendMessage(chatId, "Cleaning up members.");
+
+  Member.remove({}, function(err) {
+    if(err) {
+      bot.sendMessage(chatId, "Couldn't do that :(");
     }
   });
 });
