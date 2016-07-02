@@ -34,11 +34,24 @@ var messageSchema = mongoose.Schema({
 // This is our model
 var Message = mongoose.model('Message', messageSchema);
 
+var memberSchema = mongoose.Schema({
+  name: String
+});
+
+var Member = mongoose.model('Member', memberSchema);
 
 bot.onText(/\/faggot/, function(msg, match) {
   var chatId = msg.chat.id;
-  var faggot = arrayOfMembers[Math.floor(Math.random() * arrayOfMembers.length)];
-  bot.sendMessage(chatId, format("{name} es marico", { name: faggot }));
+
+  Member.find({}, function(err, members) {
+    if(err) {
+      console.log(err);
+      return;
+    }
+
+    var faggot = members[Math.floor(Math.random() * members.length)].name;
+    bot.sendMessage(chatId, format("{name} es marico", { name: faggot }));
+  });
 });
 
 bot.onText(/\/hey (.+)/, function(msg, match) {
@@ -108,6 +121,54 @@ bot.onText(/\/clearimportant/, function(msg, match) {
   Message.remove({}, function(err) {
     if(err) {
       bot.sendMessage(chatId, "couldn't do that :(");
+    }
+  });
+});
+
+bot.onText(/\/addmember (\w+)/, function(msg, match) {
+  var chatId = msg.chat.id;
+  var memberName = match[1];
+
+  var member = new Member({ name: memberName });
+
+  member.save(function(err, obj) {
+    if(err) {
+      console.log(err);
+      return;
+    }
+
+    bot.sendMessage(chatId, "Member saved correctly");
+  });
+});
+
+bot.onText(/\/listmembers/, function(msg, match) {
+  var chatId = msg.chat.id;
+
+  Member.find({},
+  function (err, members) {
+    if(err) {
+      console.log(err)
+      return;
+    }
+
+    if(members.length > 0) {
+      members.forEach(function (mbr) {
+        bot.sendMessage(chatId, format("- {member}", { member: mbr.name }));
+      });
+    } else {
+      bot.sendMessage(chatId, "No members stored yet.");
+    }
+  });
+});
+
+bot.onText(/\/clearmembers/, function(msg, match) {
+  var chatId = msg.chat.id;
+
+  bot.sendMessage(chatId, "Cleaning up members.");
+
+  Member.remove({}, function(err) {
+    if(err) {
+      bot.sendMessage(chatId, "Couldn't do that :(");
     }
   });
 });
