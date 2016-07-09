@@ -200,4 +200,4 @@ setInterval(function () {
   if(process.env.chatId != undefined) {
     sendImportantMessages(process.env.chatId);
   }
-}, 7200000);
+}, process.env.REPEATINTERVAL);
