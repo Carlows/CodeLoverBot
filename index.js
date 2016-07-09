@@ -2,7 +2,7 @@ var TelegramBot = require('node-telegram-bot-api');
 var Cleverbot = require('cleverbot-node');
 var format = require('string-template');
 var mongoose = require('mongoose');
-var moment = require('moment');
+var moment = require('moment-timezone');
 var _ = require('lodash');
 
 var token = process.env.BOT_TOKEN;
@@ -27,7 +27,8 @@ db.once('open', function() {
 
 // This is our Schema
 var messageSchema = mongoose.Schema({
-  message: String
+  message: String,
+  created_VET: Date
 }, {
   timestamps: true
 });
@@ -77,8 +78,12 @@ bot.onText(/\/storeimportant (.+)/, function(msg, match) {
   var chatId = msg.chat.id;
   var messageToStore = match[1];
 
+  var time = moment();
+  var created = moment.tz("America/Caracas");
+
   var msg = new Message({
-    message: messageToStore
+    message: messageToStore,
+    created_VET: created.toDate()
   });
 
   msg.save(function (err, message) {
@@ -94,7 +99,7 @@ bot.onText(/\/storeimportant (.+)/, function(msg, match) {
 bot.onText(/\/important/, function(msg, match) {
   var chatId = msg.chat.id;
 
-  var today = moment().startOf('day');
+  var today = moment().tz("America/Caracas").startOf('day');
   var tomorrow = moment(today).add(1, 'days');
 
   Message.find({ createdAt: { $gte: today.toDate(), $lt: tomorrow.toDate() } },
@@ -108,7 +113,7 @@ bot.onText(/\/important/, function(msg, match) {
       var formattedMsgs = _.map(messages, function(msg) { return format("- {msj}\n", { msj: msg.message }) });
 
       bot.sendMessage(chatId, format("Important messages for *{date}*\n\n{msgs}", {
-        date: moment().format("dddd, MMMM Do"),
+        date: moment().tz("America/Caracas").format("dddd, MMMM Do"),
         msgs: formattedMsgs.join('')
       }), { parse_mode: "Markdown" });
     } else {
