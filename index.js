@@ -98,7 +98,11 @@ bot.onText(/\/storeimportant (.+)/, function(msg, match) {
 
 bot.onText(/\/important/, function(msg, match) {
   var chatId = msg.chat.id;
+  console.log(chatId);
+  sendImportantMessages(chatId);
+});
 
+function sendImportantMessages(chatId) {
   var today = moment().tz("America/Caracas").startOf('day');
   var tomorrow = moment(today).add(1, 'days');
 
@@ -112,15 +116,15 @@ bot.onText(/\/important/, function(msg, match) {
     if(messages.length > 0) {
       var formattedMsgs = _.map(messages, function(msg) { return format("- {msj}\n", { msj: msg.message }) });
 
-      bot.sendMessage(chatId, format("Important messages for *{date}*\n\n{msgs}", {
+      bot.sendMessage(chatId, format("Hey mamagüevo, deja de perder el tiempo y trabaja en algo productivo.\n\nImportant tasks/messages for *{date}*\n\n{msgs}", {
         date: moment().tz("America/Caracas").format("dddd, MMMM Do"),
         msgs: formattedMsgs.join('')
       }), { parse_mode: "Markdown" });
     } else {
-      bot.sendMessage(chatId, "No messages stored for today.");
+      bot.sendMessage(chatId, "Hey mamagüevo, deja de perder el tiempo y trabaja en algo productivo.\n\nNo important tasks or messages stored for today.\nPero aún puedes hacer algo con tu vida, get to it!!!");
     }
   });
-});
+}
 
 bot.onText(/\/clearimportant/, function(msg, match) {
   var chatId = msg.chat.id;
@@ -190,3 +194,10 @@ bot.onText(/\/clearmembers/, function(msg, match) {
     }
   });
 });
+
+setInterval(function () {
+  console.log('executing interval!');
+  if(process.env.chatId != undefined) {
+    sendImportantMessages(process.env.chatId);
+  }
+}, 7200000);
