@@ -195,9 +195,12 @@ bot.onText(/\/clearmembers/, function(msg, match) {
   });
 });
 
-setInterval(function () {
-  console.log('executing interval!');
-  if(process.env.chatId != undefined) {
-    sendImportantMessages(process.env.chatId);
-  }
-}, 7200000);
+var interval;
+if(process.env.REPEATINTERVAL && interval == null) {
+  interval = setInterval(function () {
+    console.log('executing interval!');
+    if(process.env.chatId != undefined) {
+      sendImportantMessages(process.env.chatId);
+    }
+  }, process.env.REPEATINTERVAL);
+}
